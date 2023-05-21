@@ -33,8 +33,6 @@ headers = {
 
 
 def generate_report(ti):
-    print('Making request generate_report')
-
     response = requests.post(f'{base_url}/generate_report', headers=headers)
     response.raise_for_status()
     task_id = json.loads(response.content)['task_id']
@@ -43,7 +41,6 @@ def generate_report(ti):
 
 
 def get_report(ti):
-    print('Making request get_report')
     task_id = ti.xcom_pull(key='task_id')
 
     report_id = None
@@ -67,17 +64,13 @@ def get_report(ti):
 
 
 def get_increment(date, ti):
-    print('Making request get_increment')
-    report_id = ti.xcom_pull(key='report_id')
     response = requests.get(
         f'{base_url}/get_increment?report_id={report_id}&date={str(date)}T00:00:00',
         headers=headers)
     response.raise_for_status()
-    print(f'Response is {response.content}')
 
     increment_id = json.loads(response.content)['data']['increment_id']
     ti.xcom_push(key='increment_id', value=increment_id)
-    print(f'increment_id={increment_id}')
 
 
 def upload_data_to_staging(filename, date, pg_table, pg_schema, ti):

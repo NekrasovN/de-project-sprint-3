@@ -14,6 +14,14 @@ customers_refunded bigint
 ;
 
 
+delete from mart.f_customer_retention where period_id in (
+	select date_id 
+	from staging.user_order_log uol
+	left join mart.d_calendar as dc on uol.date_time::Date = dc.date_actual
+	where uol.date_time::Date = '{{ds}}'
+)
+;
+
 with 
 ft as
 (
@@ -88,16 +96,7 @@ ft as
 	select distinct first_day_of_week
 	from ft
 )
-,del as 
-(
-	delete from mart.f_customer_retention c
-	using dates d
-	where c.period_id = d.first_day_of_week
-)
-
-
 insert into mart.f_customer_retention
-
 select 
 n.new_cust_cnt as new_customers_count
 , r.ret_cust_cnt as returning_customers_count
